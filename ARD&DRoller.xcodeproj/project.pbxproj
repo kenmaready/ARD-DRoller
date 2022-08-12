@@ -56,10 +56,10 @@
 			isa = PBXGroup;
 			children = (
 				9BFD311928A6AC9500984B5A /* AppDelegate.swift */,
-				9BFD311B28A6AC9500984B5A /* art.scnassets */,
 				9BFD311D28A6AC9500984B5A /* ViewController.swift */,
 				9BFD311F28A6AC9500984B5A /* Main.storyboard */,
 				9BFD312228A6AC9600984B5A /* Assets.xcassets */,
+				9BFD311B28A6AC9500984B5A /* art.scnassets */,
 				9BFD312428A6AC9600984B5A /* LaunchScreen.storyboard */,
 			);
 			path = "ARD&DRoller";
