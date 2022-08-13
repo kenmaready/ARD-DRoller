@@ -19,6 +19,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         // Set the view's delegate
         sceneView.delegate = self
     
+        // random experimenting with shapes and materials:
 //        let material1 = SCNMaterial()
 //        material1.diffuse.contents = UIColor.systemPurple
 //
@@ -67,7 +68,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 //        let scene = SCNScene(named: "art.scnassets/ship.scn")!
         
         
-        // dice scene
+        // dice scene floating in space in front of user:
 //        let diceScene = SCNScene(named: "art.scnassets/diceCollada.scn")!
 //        if let diceNode = diceScene.rootNode.childNode(withName: "Dice", recursively: true) {
 //            diceNode.position = SCNVector3(x: -0.01, y:-0.01, z: -0.1)
@@ -94,6 +95,34 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         // Pause the view's session
         sceneView.session.pause()
+    }
+    
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        if let touch = touches.first {
+            let touchLocation = touch.location(in: sceneView)
+            
+            if let query = sceneView.raycastQuery(from: touchLocation, allowing: .existingPlaneGeometry, alignment: .any) {
+                let results = sceneView.session.raycast(query)
+                if let hitResult = results.first {
+                    let diceScene = SCNScene(named: "art.scnassets/diceCollada.scn")!
+                    if let diceNode = diceScene.rootNode.childNode(withName: "Dice", recursively: true) {
+                        
+                        diceNode.position = SCNVector3(
+                            x: hitResult.worldTransform.columns.3.x,
+                            y: hitResult.worldTransform.columns.3.y + diceNode.boundingSphere.radius,
+                            z: hitResult.worldTransform.columns.3.z)
+    
+                        sceneView.scene.rootNode.addChildNode(diceNode)
+                        
+                        // roll dice & animate
+                        let randomX = Float(arc4random_uniform(4) + 1) * (Float.pi / 2)
+                        
+                        let randomZ = Float(arc4random_uniform(4) + 1) * (Float.pi / 2)
+                        diceNode.runAction(SCNAction.rotateBy(x: CGFloat(randomX * 2), y: 0.0, z: CGFloat(randomZ * 2), duration: 0.6))
+                    }
+                }
+            }
+        }
     }
     
     func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
