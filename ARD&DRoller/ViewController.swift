@@ -13,6 +13,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 
     @IBOutlet var sceneView: ARSCNView!
     
+    var diceArray = [Dice]()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         self.sceneView.debugOptions = [ARSCNDebugOptions.showFeaturePoints]
@@ -97,6 +99,15 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         sceneView.session.pause()
     }
     
+    @IBAction func rollDiceButtonTapped(_ sender: UIButton) {
+        rollAllDice()
+    }
+    
+    override func motionEnded(_ motion: UIEvent.EventSubtype, with event: UIEvent?) {
+        rollAllDice()
+    }
+    
+    
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         if let touch = touches.first {
             let touchLocation = touch.location(in: sceneView)
@@ -104,30 +115,30 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             if let query = sceneView.raycastQuery(from: touchLocation, allowing: .existingPlaneGeometry, alignment: .any) {
                 let results = sceneView.session.raycast(query)
                 if let hitResult = results.first {
-                    let diceScene = SCNScene(named: "art.scnassets/diceCollada.scn")!
-                    if let diceNode = diceScene.rootNode.childNode(withName: "Dice", recursively: true) {
-                        
-                        diceNode.position = SCNVector3(
-                            x: hitResult.worldTransform.columns.3.x,
-                            y: hitResult.worldTransform.columns.3.y + diceNode.boundingSphere.radius,
-                            z: hitResult.worldTransform.columns.3.z)
-    
-                        sceneView.scene.rootNode.addChildNode(diceNode)
-                        
-                        // roll dice & animate
-                        let randomX = Float(arc4random_uniform(4) + 1) * (Float.pi / 2)
-                        
-                        let randomZ = Float(arc4random_uniform(4) + 1) * (Float.pi / 2)
-                        diceNode.runAction(SCNAction.rotateBy(x: CGFloat(randomX * 2), y: 0.0, z: CGFloat(randomZ * 2), duration: 0.6))
+                    let newDice = Dice(at: hitResult)
+                    print("newDice created...")
+                    diceArray.append(newDice)
+                    if newDice.node != nil {
+                        print("ading newDice.node to scene...")
+                        sceneView.scene.rootNode.addChildNode(newDice.node!)
+                        newDice.roll()
                     }
                 }
             }
         }
     }
     
+    func rollAllDice() {
+        if !diceArray.isEmpty {
+            for dice in diceArray {
+                dice.roll()
+            }
+        }
+    }
+    
     func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
         if anchor is ARPlaneAnchor {
-            print("Plane deteched...")
+            
             let planeAnchor = anchor as! ARPlaneAnchor
             let plane = SCNPlane(width: CGFloat(planeAnchor.extent.x), height: CGFloat(planeAnchor.extent.z))
             
