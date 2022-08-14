@@ -34,5 +34,13 @@ class Dice {
             z: CGFloat(randomZ * 3),
             duration: 0.7)
         )
+        
+//        print("current pivot: \(node?.pivot)")
+//        print("current simdRotation: \(node?.simdRotation)")
+    }
+    
+    func remove() {
+        // node?.runAction(SCNAction.fadeOut(duration: 1.5))
+        node?.removeFromParentNode()
     }
 }
